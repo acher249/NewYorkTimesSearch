@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <title>NYT API</title>
+</head>
+
+<body>
+    <div class="jumbotron">
+        <h1 class=" display-4 mainTitle">New York Times Search</h1>
+    </div>
+
+    <div class="card">
+        <h5 class="card-header">Search Parameters</h5>
+        <div class="card-body">
+                <form>
+                    <div class="form-group searchTerm">
+                        <label for="searchTermInput">Search Term:</label>
+                        <input type="text" class="form-control" id="searchTermInput">
+                    </div>
+                    <div class="form-group numberRecord">
+                        <label for="numberRecordInput">Number of Record to Retrieve:</label>
+                        <input type="text" class="form-control" id="numberRecordInput">
+                    </div>
+                    <div class="form-group startYear">
+                            <label for="startYearInput">Start Year (Optional)</label>
+                            <input type="text" class="form-control" id="startYearInput">
+                        </div>
+                        <div class="form-group EndYear">
+                            <label for="EndYearInput">End Year (Optional)</label>
+                            <input type="text" class="form-control" id="EndYearInput">
+                        </div>
+                </form>
+
+            <a href="#" class="btn btn-primary" id="searchButton">Search</a>
+            <a href="#" class="btn btn-primary" id="clearButton">Clear Results</a>
+        </div>
+    </div>
+
+    <div class="card card2">
+        <h5 class="card-header">Top Articles</h5>
+        <div class="card-body" id="results">
+            <!-- This is where the results drop -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        
+        var searchTerm = $("#searchTermInput").val();  /* use .trim*/
+        var numberRecord = $("#numberRecordInput").val();
+        var startYear = $("#startYearInput").val();
+        var endYear = $("#EndYearInput").val();
+
+        $("#searchButton").on("click", function(event) {
+
+            searchTerm = $("#searchTermInput").val();  /* use .trim*/
+            numberRecord = $("#numberRecordInput").val();
+            startYear = $("#startYearInput").val();
+            endYear = $("#EndYearInput").val();
+
+            var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+            url += '?' + $.param({
+                'api-key': "7b64cc6d18a441fbb7496f9ca5f3a54e",
+                'q': searchTerm,
+                'begin_date': startYear,
+                'end_date': endYear
+            });
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+            }).then(function (result) {
+                console.log(result.response);
+                $.each(result.response.docs, function (index, doc) {
+                    var article = $("<div>").addClass("jumbotron");
+                    article.append($("<h3>").text(doc.headline.main));
+                    article.append($("<p>").text(doc.byline.original)); /*author*/
+                    if (typeof doc.section_name !== "undefined") {
+                        article.append($("<p>").text("Section: " + doc.section_name));
+                    }
+                    var pubDate = new Date(doc.pub_date);
+                    var monthNames = ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"
+                    ];
+                    article.append($("<p>").text(monthNames[pubDate.getMonth()] + " " + pubDate.getDay() + ", " + pubDate.getFullYear()));
+                    $("#results").prepend(article);
+
+                    var author = doc.byline.original;
+                    var date = pubDate;
+                    // paste
+
+                });
+            }).fail(function (err) {
+                throw err;
+            });
+
+            console.log(searchTerm);
+            console.log(numberRecord);
+            console.log(startYear);
+            console.log(endYear);
+
+        });
+
+        $("#clearButton").on("click", function(event) {
+            searchTerm = $("#searchTermInput").val("");  /* use .trim*/
+            numberRecord = $("#numberRecordInput").val("");
+            startYear = $("#startYearInput").val("");
+            EndYear = $("#EndYearInput").val("");
+        });
+
+
+    
+    </script>
+
+
+
+    <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+</body>
+</html>
